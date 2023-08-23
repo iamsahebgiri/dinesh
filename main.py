@@ -8,10 +8,10 @@ import dns.name
 import dns.rcode
 
 from services.rand import Random
-from services.echo import Echo
+from services.pwd import Password
 
 
-services = [Random, Echo]
+services = [Random, Password]
 ttl = 1
 
 
@@ -45,6 +45,9 @@ class DNSHandler(socketserver.BaseRequestHandler):
                     case "rand":
                         rand = Random().query(args)
                         reply.answer.append(self.make_reponse(rand, cmd))
+                    case "pwd":
+                        pwd = Password().query(args)
+                        reply.answer.append(self.make_reponse(pwd, cmd))
                     case "help":
                         help_rrset = dns.rrset.RRset(
                             qname,
