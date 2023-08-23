@@ -16,21 +16,36 @@ ttl = 1
 
 
 class DNSHandler(socketserver.BaseRequestHandler):
+    def make_reponse(self, message: str | int, name="."):
+        txt = TXT(
+            dns.rdataclass.IN,
+            dns.rdatatype.TXT,
+            [bytes(str(message), "utf-8")],
+        )
+        rrset = dns.rrset.RRset(
+            dns.name.from_text(name),
+            dns.rdataclass.IN,
+            dns.rdatatype.TXT,
+        )
+        rrset.add(txt, ttl)
+        return rrset
+
     def handle(self):
         data = self.request[0]
         socket = self.request[1]
 
+        request = dns.message.from_wire(data)
+        reply = dns.message.make_response(request)
         try:
-            request = dns.message.from_wire(data)
-            reply = dns.message.make_response(request)
-
             for question in request.question:
                 qname = question.name
-                name = qname.to_text()
+                [cmd, *args] = qname.to_text().strip(".").split(".")
 
-                match name:
-                    case "help.":
-                        print("no?")
+                match cmd:
+                    case "rand":
+                        rand = Random().query(args)
+                        reply.answer.append(self.make_reponse(rand, cmd))
+                    case "help":
                         help_rrset = dns.rrset.RRset(
                             qname,
                             dns.rdataclass.IN,
@@ -46,26 +61,18 @@ class DNSHandler(socketserver.BaseRequestHandler):
 
                         reply.answer.append(help_rrset)
                     case _:
-                        err = "error: unknown query try 'dig help @127.0.0.1'"
-                        error_txt = TXT(
-                            dns.rdataclass.IN,
-                            dns.rdatatype.TXT,
-                            [bytes(err, "utf-8")],
+                        error_rrset = self.make_reponse(
+                            "error: unknown query try 'dig help @127.0.0.1'",
                         )
-                        err_rrset = dns.rrset.RRset(
-                            qname,
-                            dns.rdataclass.IN,
-                            dns.rdatatype.TXT,
-                        )
-                        err_rrset.add(error_txt, ttl)
-                        reply.answer.append(err_rrset)
-                        reply.set_rcode(
-                            dns.rcode.SERVFAIL
-                        )  # Return 'Non-Existent Domain' error
-
-            socket.sendto(reply.to_wire(), self.client_address)
+                        reply.answer.append(error_rrset)
+                        reply.set_rcode(dns.rcode.NXDOMAIN)
         except Exception as e:
             print("Error:", e)
+            error_rrset = self.make_reponse(f"error: {e}")
+            reply.answer.append(error_rrset)
+            reply.set_rcode(dns.rcode.SERVFAIL)
+        finally:
+            socket.sendto(reply.to_wire(), self.client_address)
 
 
 class DNSServer(socketserver.ThreadingUDPServer):
