@@ -9,9 +9,11 @@ import dns.rcode
 
 from services.rand import Random
 from services.pwd import Password
+from services.ip import IP
+from services.num2words import Num2Word
 
 
-services = [Random, Password]
+services = [Random, Password, IP, Num2Word]
 ttl = 1
 
 
@@ -48,6 +50,13 @@ class DNSHandler(socketserver.BaseRequestHandler):
                     case "pwd":
                         pwd = Password().query(args)
                         reply.answer.append(self.make_reponse(pwd, cmd))
+                    case "ip":
+                        reply.answer.append(
+                            self.make_reponse(self.client_address[0], cmd)
+                        )
+                    case "words":
+                        words = Num2Word().query(args)
+                        reply.answer.append(self.make_reponse(words, cmd))
                     case "help":
                         help_rrset = dns.rrset.RRset(
                             qname,

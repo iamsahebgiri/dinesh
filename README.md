@@ -7,6 +7,14 @@ nc -vu 127.0.0.1 1053
 dig +retry=0 -p 1053 @127.0.0.1 +noedns google.com
 ```
 
+### Help
+
+Show a list of all supported commands with examples
+
+```sh
+dig help @127.0.0.1 +short
+```
+
 ### Random Number
 
 Generate random number between [min, max] both inclusive.
@@ -37,4 +45,26 @@ dig pwd @127.0.0.1 +short
 
 dig pwd.32 @127.0.0.1 +short
 # "Efe3301RDS7V3bdKHb_zcRBRG_EYnQH_"
+```
+
+### IP
+
+Returns Host's IP Address.
+
+#### Examples
+
+```sh
+dig ip @127.0.0.1 +short
+# "127.0.0.1"
+```
+
+### Number to words
+
+Convert number to words.
+
+#### Examples
+
+```sh
+dig words.1024 @127.0.0.1 +short
+# "one thousand and twenty-four"
 ```
