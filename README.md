@@ -1,6 +1,6 @@
 <p align="center">
   <a href="https://github.com/iamsahebgiri/dinesh">
-    <img width="380" alt="DINESH" src="https://github.com/iamsahebgiri/dinesh/assets/47132373/e481c47e-8c28-4b74-b703-544f0b0bf449">
+    <img width="280" alt="DINESH" src="https://github.com/iamsahebgiri/dinesh/assets/47132373/e481c47e-8c28-4b74-b703-544f0b0bf449">
   </a>
 </p>
 <div align="center">
